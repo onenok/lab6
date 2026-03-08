@@ -26,6 +26,7 @@ if (!$response->success) {
 if ($response->result && $data = $response->result->fetch_assoc()) {
     if (password_verify($pwd, $data['pwd'])) {
         $_SESSION["login"] = $data['loginname'];
+        $_SESSION["member_id"] = $data['Member_id']; // store member_id in session for later use
     }
 }
 

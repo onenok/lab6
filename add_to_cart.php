@@ -9,13 +9,15 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 // ensure user is logged in
-if (empty($_SESSION['login'])) {
+if (empty($_SESSION['login'])||empty($_SESSION['member_id'])) {
     // redirect to login page or show message
     header('Location: login.php?msg=please_login');
     exit;
 }
 
-$member = $_SESSION['login'];
+$memberLoginName = $_SESSION['login'];
+$memberID = $_SESSION['member_id'];
+// product_id and qty from POST
 $product_id = isset($_POST['product_id']) ? intval($_POST['product_id']) : 0;
 $qty = isset($_POST['qty']) ? intval($_POST['qty']) : 0;
 
@@ -52,7 +54,7 @@ if ($available !== null && $qty > $available) {
 
 // insert/update cart
 // check existing entry
-$check = safeQuery('SELECT qty FROM cart WHERE loginname = ? AND product_id = ?', 'si', [$member, $product_id]);
+$check = safeQuery('SELECT qty FROM cart WHERE member_id = ? AND product_id = ?', 'si', [$memberID, $product_id]);
 if ($check->success && $check->result && $check->result->num_rows > 0) {
     $existing = $check->result->fetch_assoc();
     $newqty = $qty;
@@ -60,14 +62,14 @@ if ($check->success && $check->result && $check->result->num_rows > 0) {
     if ($available !== null && $newqty > $available) {
         $newqty = $available;
     }
-    safeQuery('UPDATE cart SET qty = ? WHERE loginname = ? AND product_id = ?', 'isi', [$newqty, $member, $product_id]);
+    safeQuery('UPDATE cart SET qty = ? WHERE member_id = ? AND product_id = ?', 'isi', [$newqty, $memberID, $product_id]);
 } else {
     // snapshot details
     safeQuery(
-        'INSERT INTO cart(loginname,product_id,snapshot_name,snapshot_price,snapshot_description,snapshot_type,qty) VALUES(?,?,?,?,?,?,?)',
+        'INSERT INTO cart(member_id,product_id,snapshot_name,snapshot_price,snapshot_description,snapshot_type,qty) VALUES(?,?,?,?,?,?,?)',
         'sdsdssi',
         [
-            $member,
+            $memberID,
             $product_id,
             $row['product_name'],
             $row['price'],

@@ -2,11 +2,12 @@
 session_start();
 require_once('connect.php');
 
-if (empty($_SESSION['login'])) {
+if (empty($_SESSION['login'])||empty($_SESSION['member_id'])) {
     header('Location: login.php?msg=please_login');
     exit;
 }
 $member = $_SESSION['login'];
+$memberID = $_SESSION['member_id'];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'confirm_purchase') {
     // handle purchase logic here (e.g. save order, reduce stock, clear cart)
@@ -18,7 +19,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'confi
         }
     }
     // fetch cart items and verify stock before committing
-    $cartRes = safeQuery('SELECT product_id, qty FROM cart WHERE loginname = ?', 's', [$member]);
+    $cartRes = safeQuery('SELECT product_id, qty FROM cart WHERE member_id = ?', 's', [$memberID]);
     if (!$cartRes->success || !$cartRes->result) {
         header('Location: show_cart.php?msg=purchase_failed');
         exit;
@@ -70,7 +71,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'confi
     }
 
     // clear cart and commit
-    $del = safeQuery('DELETE FROM cart WHERE loginname = ?', 's', [$member]);
+    $del = safeQuery('DELETE FROM cart WHERE member_id = ?', 's', [$memberID]);
     if ($del->success) {
         $conn->commit();
         header('Location: show_cart.php?msg=purchase_success');
@@ -90,8 +91,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'confi
         p.description AS description,
         p.type AS type
         FROM cart c jOIN products p ON c.product_id = p.product_id
-        WHERE c.loginname = ?';
-    $res = safeQuery($sql, 's', [$member]);
+        WHERE c.member_id = ?';
+    $res = safeQuery($sql, 's', [$memberID]);
     $cartItems = [];
     if ($res->success && $res->result) {
         $cartItems = $res->result->fetch_all(MYSQLI_ASSOC);
@@ -99,7 +100,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'confi
 
     // try to load member info for prefill
     $memberInfo = null;
-    $mres = safeQuery('SELECT * FROM member WHERE loginname = ?', 's', [$member]);
+    $mres = safeQuery('SELECT * FROM member WHERE member_id = ?', 's', [$memberID]);
     if ($mres->success && $mres->result && $mrow = $mres->result->fetch_assoc()) {
         $memberInfo = $mrow;
     }

@@ -17,12 +17,13 @@ $msg_key = $_GET['msg'] ?? '';
 $display_msg = $msgMap[$msg_key] ?? '';
 
 // ensure user is logged in
-if (empty($_SESSION['login'])) {
+if (empty($_SESSION['login'])||empty($_SESSION['member_id'])) {
     // redirect to login page or show message
     header('Location: login.php?msg=please_login');
     exit;
 }
 $member = $_SESSION['login'];
+$memberID = $_SESSION['member_id'];
 $cartItems = [];
 // fetch cart items for this user
 $sql = 'SELECT c.product_id, c.qty,
@@ -31,8 +32,8 @@ $sql = 'SELECT c.product_id, c.qty,
        c.snapshot_description AS description,
        c.snapshot_type AS type
 FROM cart c
-WHERE c.loginname = ?';
-$res = safeQuery($sql, 's', [$member]);
+WHERE c.member_id = ?';
+$res = safeQuery($sql, 's', [$memberID]);
 if ($res->success && $res->result) {
     $cartItems = $res->result->fetch_all(MYSQLI_ASSOC);
 }
@@ -79,7 +80,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'save_
                 break;
             }
             // delete from cart
-            $d = safeQuery('DELETE FROM cart WHERE loginname = ? AND product_id = ?', 'si', [$member, $pid]);
+            $d = safeQuery('DELETE FROM cart WHERE member_id = ? AND product_id = ?', 'si', [$memberID, $pid]);
             if (!$d->success) {
                 $status = 3; // db error
                 break;
@@ -92,7 +93,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'save_
                 break;
             }
             // update cart
-            $u = safeQuery('UPDATE cart SET qty = ? WHERE loginname = ? AND product_id = ?', 'isi', [$qty, $member, $pid]);
+            $u = safeQuery('UPDATE cart SET qty = ? WHERE member_id = ? AND product_id = ?', 'isi', [$qty, $memberID, $pid]);
             if (!$u->success) {
                 $status = 3; // db error
                 break;
@@ -118,7 +119,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'confi
         exit;
     }
     // re-fetch to ensure latest
-    $res = safeQuery($sql, 's', [$member]);
+    $res = safeQuery($sql, 's', [$memberID]);
     $cartItems = [];
     if ($res->success && $res->result) {
         $cartItems = $res->result->fetch_all(MYSQLI_ASSOC);

@@ -21,7 +21,7 @@ if (empty($_SESSION['login'])) {
 // 2. Check if user is logged-in (true/false)
 // load current user's cart product ids to mark items already in cart
 $cartProductIds = [];
-$cartRes = safeQuery('SELECT product_id FROM cart WHERE loginname = ?', 's', [$_SESSION['login']]);
+$cartRes = safeQuery('SELECT product_id FROM cart WHERE member_id = ?', 's', [$_SESSION['member_id']]);
 if ($cartRes->success && $cartRes->result) {
     $rows = $cartRes->result->fetch_all(MYSQLI_ASSOC);
     foreach ($rows as $r) {
