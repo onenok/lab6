@@ -152,7 +152,7 @@ $display_msg = $messages[$msg_key] ?? '';
       <hr>
       <!-- Link to signup -->
       <p style="text-align:center; margin: 10px 0;">
-        <a href="signup.php" style="font-size: 13px; color: #1c87c9;">Don't have an account? Sign up</a>
+        <a href="member_reg.php" style="font-size: 13px; color: #1c87c9;">Don't have an account? Sign up</a>
       </p>
 
       <div class="btn-block">

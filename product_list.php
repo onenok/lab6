@@ -12,18 +12,20 @@ $messages = [
 ];
 $msg_key = $_GET['msg'] ?? '';
 $display_msg = $messages[$msg_key] ?? '';
-
+// ensure user is logged in
+if (empty($_SESSION['login'])) {
+    // redirect to login page or show message
+    header('Location: login.php?msg=please_login');
+    exit;
+}
 // 2. Check if user is logged-in (true/false)
-$isLoggedIn = !empty($_SESSION['login']);
 // load current user's cart product ids to mark items already in cart
 $cartProductIds = [];
-if ($isLoggedIn) {
-    $cartRes = safeQuery('SELECT product_id FROM cart WHERE member_id = ?', 's', [$_SESSION['login']]);
-    if ($cartRes->success && $cartRes->result) {
-        $rows = $cartRes->result->fetch_all(MYSQLI_ASSOC);
-        foreach ($rows as $r) {
-            $cartProductIds[intval($r['product_id'])] = true;
-        }
+$cartRes = safeQuery('SELECT product_id FROM cart WHERE loginname = ?', 's', [$_SESSION['login']]);
+if ($cartRes->success && $cartRes->result) {
+    $rows = $cartRes->result->fetch_all(MYSQLI_ASSOC);
+    foreach ($rows as $r) {
+        $cartProductIds[intval($r['product_id'])] = true;
     }
 }
 // get types of products for filter options
@@ -68,7 +70,7 @@ try {
     <title>商品列表</title>
     <link rel="stylesheet" href="style.css?v=<?php echo filemtime('style.css'); ?>">
     <style>
-        /* list.php */
+        /* product_list.php */
         .content {
             max-width: 900px;
             margin: 30px auto;
@@ -289,17 +291,17 @@ try {
         <div style="display:grid; grid-template-columns: fit-content(100%) auto fit-content(100%); align-items: center; gap: 10px;">
             <a href="index.php">返回主頁</a>
             <div></div>
-            <a href="shopping_cart.php">查看購物車</a>
+            <a href="show_cart.php">查看購物車</a>
         </div>
 
         <div class="filter-container">
             <select onchange="location = this.value;" class="filter-select">
-                <option value="list.php" <?php if (!$showingType) echo 'selected'; ?>>全部類型</option>
+                <option value="product_list.php" <?php if (!$showingType) echo 'selected'; ?>>全部類型</option>
                 <?php
                 // Get distinct types from products for filter options
                 foreach ($product_types as $type) {
                     $selected = ($type === $showingType) ? 'selected' : '';
-                    echo "<option value='list.php?type=" . urlencode($type) . "' $selected>" . htmlspecialchars($type) . "</option>";
+                    echo "<option value='product_list.php?type=" . urlencode($type) . "' $selected>" . htmlspecialchars($type) . "</option>";
                 }
                 ?>
             </select>
@@ -338,12 +340,10 @@ try {
                     <div class="actions">
                         <?php if ($remaining !== null && $remaining <= 0): ?>
                             <button class="sold-out-btn" disabled>售罄</button>
-                        <?php elseif ($isLoggedIn): ?>
-                            <?php if (!empty($cartProductIds[intval($product['product_id'])])): ?>
-                                <a href="shopping_cart.php" class="cart-button in-cart">已在購物車</a>
-                            <?php else: ?>
-                                <button class="add-cart-button cart-button" data-selected-count="<?php echo $product['product_id']; ?>" data-id="<?php echo $product['product_id']; ?>" <?php if ($remaining !== null) echo ' data-qty="' . htmlspecialchars($remaining) . '"'; ?>>加入購物車</button>
-                            <?php endif; ?>
+                        <?php elseif (!empty($cartProductIds[intval($product['product_id'])])): ?>
+                            <a href="show_cart.php" class="cart-button in-cart">已在購物車</a>
+                        <?php else: ?>
+                            <button class="add-cart-button cart-button" data-selected-count="<?php echo $product['product_id']; ?>" data-id="<?php echo $product['product_id']; ?>" <?php if ($remaining !== null) echo ' data-qty="' . htmlspecialchars($remaining) . '"'; ?>>加入購物車</button>
                         <?php endif; ?>
                     </div>
                 </li>

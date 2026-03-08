@@ -4,7 +4,7 @@ require_once('connect.php');
 
 // simple handler for add-to-cart requests
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    header('Location: list.php');
+    header('Location: product_list.php');
     exit;
 }
 
@@ -21,14 +21,14 @@ $qty = isset($_POST['qty']) ? intval($_POST['qty']) : 0;
 
 // basic validation
 if ($product_id <= 0 || $qty < 1) {
-    header('Location: list.php?msg=invalid_input');
+    header('Location: product_list.php?msg=invalid_input');
     exit;
 }
 
 // CSRF check
 if (!empty($_POST['csrf_token'])) {
     if (!hash_equals($_SESSION['csrf_token'] ?? '', $_POST['csrf_token'])) {
-        header('Location: list.php?msg=csrf_error');
+        header('Location: product_list.php?msg=csrf_error');
         exit;
     }
 }
@@ -36,7 +36,7 @@ if (!empty($_POST['csrf_token'])) {
 // fetch product to verify exists and optional stock
 $res = safeQuery('SELECT * FROM products WHERE product_id = ?', 'i', [$product_id]);
 if (!$res->success || !$res->result || $res->result->num_rows === 0) {
-    header('Location: list.php?msg=product_not_found');
+    header('Location: product_list.php?msg=product_not_found');
     exit;
 }
 $row = $res->result->fetch_assoc();
@@ -46,13 +46,13 @@ if (isset($row['qty'])) {
     $available = intval($row['qty']);
 }
 if ($available !== null && $qty > $available) {
-    header('Location: list.php?msg=out_of_stock');
+    header('Location: product_list.php?msg=out_of_stock');
     exit;
 }
 
 // insert/update cart
 // check existing entry
-$check = safeQuery('SELECT qty FROM cart WHERE member_id = ? AND product_id = ?', 'si', [$member, $product_id]);
+$check = safeQuery('SELECT qty FROM cart WHERE loginname = ? AND product_id = ?', 'si', [$member, $product_id]);
 if ($check->success && $check->result && $check->result->num_rows > 0) {
     $existing = $check->result->fetch_assoc();
     $newqty = $qty;
@@ -60,11 +60,11 @@ if ($check->success && $check->result && $check->result->num_rows > 0) {
     if ($available !== null && $newqty > $available) {
         $newqty = $available;
     }
-    safeQuery('UPDATE cart SET qty = ? WHERE member_id = ? AND product_id = ?', 'isi', [$newqty, $member, $product_id]);
+    safeQuery('UPDATE cart SET qty = ? WHERE loginname = ? AND product_id = ?', 'isi', [$newqty, $member, $product_id]);
 } else {
     // snapshot details
     safeQuery(
-        'INSERT INTO cart(member_id,product_id,snapshot_name,snapshot_price,snapshot_description,snapshot_type,qty) VALUES(?,?,?,?,?,?,?)',
+        'INSERT INTO cart(loginname,product_id,snapshot_name,snapshot_price,snapshot_description,snapshot_type,qty) VALUES(?,?,?,?,?,?,?)',
         'sdsdssi',
         [
             $member,
@@ -78,5 +78,5 @@ if ($check->success && $check->result && $check->result->num_rows > 0) {
     );
 }
 
-header('Location: list.php?msg=added');
+header('Location: product_list.php?msg=added');
 exit;

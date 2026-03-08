@@ -94,16 +94,18 @@ $display_msg = $messages[$msg_key] ?? '';
         <h1>歡迎來到首頁</h1>
         <p>目前身份：<strong><?php echo htmlspecialchars($username); ?></strong></p>
 
+        <!--
         <div class="public-actions">
-            <a href="list.php" class="action-card"> <!-- View Product List -->
-                <div>📋</div>
-                <div>查看商品列表</div>
-            </a>
         </div>
+        -->
         <!-- 3. Logic: Only members can see these cards -->
         <?php if ($isLoggedIn): ?>
             <div class="member-actions">
-                <a href="shopping_cart.php" class="action-card">
+                <a href="product_list.php" class="action-card"> <!-- View Product List -->
+                    <div>📋</div>
+                    <div>查看商品列表</div>
+                </a>
+                <a href="show_cart.php" class="action-card">
                     <div>🛒</div>
                     <div>我的購物車</div>
                 </a>

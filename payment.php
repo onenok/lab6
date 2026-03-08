@@ -13,19 +13,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'confi
     // CSRF check
     if (!empty($_POST['csrf_token'])) {
         if (!hash_equals($_SESSION['csrf_token'] ?? '', $_POST['csrf_token'])) {
-            header('Location: shopping_cart.php?msg=purchase_failed');
+            header('Location: show_cart.php?msg=purchase_failed');
             exit;
         }
     }
     // fetch cart items and verify stock before committing
-    $cartRes = safeQuery('SELECT product_id, qty FROM cart WHERE member_id = ?', 's', [$member]);
+    $cartRes = safeQuery('SELECT product_id, qty FROM cart WHERE loginname = ?', 's', [$member]);
     if (!$cartRes->success || !$cartRes->result) {
-        header('Location: shopping_cart.php?msg=purchase_failed');
+        header('Location: show_cart.php?msg=purchase_failed');
         exit;
     }
     $cartItems = $cartRes->result->fetch_all(MYSQLI_ASSOC);
     if (empty($cartItems)) {
-        header('Location: shopping_cart.php?msg=purchase_failed');
+        header('Location: show_cart.php?msg=purchase_failed');
         exit;
     }
 
@@ -65,19 +65,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'confi
 
     if (!$ok) {
         $conn->rollback();
-        header('Location: shopping_cart.php?msg=out_of_stock');
+        header('Location: show_cart.php?msg=out_of_stock');
         exit;
     }
 
     // clear cart and commit
-    $del = safeQuery('DELETE FROM cart WHERE member_id = ?', 's', [$member]);
+    $del = safeQuery('DELETE FROM cart WHERE loginname = ?', 's', [$member]);
     if ($del->success) {
         $conn->commit();
-        header('Location: shopping_cart.php?msg=purchase_success');
+        header('Location: show_cart.php?msg=purchase_success');
         exit;
     } else {
         $conn->rollback();
-        header('Location: shopping_cart.php?msg=purchase_failed');
+        header('Location: show_cart.php?msg=purchase_failed');
         exit;
     }
 } else {
@@ -90,7 +90,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'confi
         p.description AS description,
         p.type AS type
         FROM cart c jOIN products p ON c.product_id = p.product_id
-        WHERE c.member_id = ?';
+        WHERE c.loginname = ?';
     $res = safeQuery($sql, 's', [$member]);
     $cartItems = [];
     if ($res->success && $res->result) {
@@ -99,7 +99,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'confi
 
     // try to load member info for prefill
     $memberInfo = null;
-    $mres = safeQuery('SELECT * FROM member WHERE member_id = ?', 's', [$member]);
+    $mres = safeQuery('SELECT * FROM member WHERE loginname = ?', 's', [$member]);
     if ($mres->success && $mres->result && $mrow = $mres->result->fetch_assoc()) {
         $memberInfo = $mrow;
     }
@@ -189,9 +189,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'confi
     <?php require_once 'nav.php'; ?>
     <div class="content payment-container">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-            <a href="shopping_cart.php">返回購物車</a>
+            <a href="show_cart.php">返回購物車</a>
             <h1>結帳</h1>
-            <a href="list.php">繼續購物</a>
+            <a href="product_list.php">繼續購物</a>
         </div>
 
         <?php if (empty($cartItems)): ?>
@@ -246,7 +246,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'confi
                         <div class="total">合計：<?php echo htmlspecialchars(number_format($total, 2)); ?></div>
                         <div style="margin-top:12px; display:flex; gap:8px;">
                             <button type="submit" class="btn primary">確認下單</button>
-                            <a href="shopping_cart.php" class="btn">返回購物車</a>
+                            <a href="show_cart.php" class="btn">返回購物車</a>
                         </div>
                     </form>
                 </div>

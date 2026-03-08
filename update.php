@@ -39,7 +39,7 @@ if (empty($oldPwd)) {
 }
 
 // fetch user row from member table
-$sql_auth = "SELECT * FROM member WHERE member_id = ?";
+$sql_auth = "SELECT * FROM member WHERE loginname = ?";
 $authRes = safeQuery($sql_auth, "s", [$oldName]);
 if (!$authRes->success || $authRes->result->num_rows == 0) {
     header('Location: editAccount.php?msg=invalid_user_or_password');
@@ -81,7 +81,7 @@ if ($isNameSame && $isPwdSame) {
 
 // --- [STEP 3: CONFLICT CHECK] ---
 if (!empty($newNameInput) && $newNameInput !== $oldName) {
-  $sql_checkName = "SELECT * FROM member WHERE member_id = ?";
+  $sql_checkName = "SELECT * FROM member WHERE loginname = ?";
   $nameRes = safeQuery($sql_checkName, "s", [$newNameInput]);
   if ($nameRes->result && $nameRes->result->num_rows > 0) {
     header('Location: editAccount.php?msg=username_already_used');
@@ -93,7 +93,7 @@ if (!empty($newNameInput) && $newNameInput !== $oldName) {
 $finalName = !empty($newNameInput) ? $newNameInput : $oldName;
 $finalPwdHash = !empty($newPwdInput) ? password_hash($newPwdInput, PASSWORD_DEFAULT) : $row['pwd'];
 
-$sql_update = "UPDATE `member` SET `member_id` = ?, `pwd` = ? WHERE `member_id` = ?";
+$sql_update = "UPDATE `member` SET `loginname` = ?, `pwd` = ? WHERE `loginname` = ?";
 $updateRes = safeQuery($sql_update, "sss", [$finalName, $finalPwdHash, $oldName]);
 
 if ($updateRes->affected_rows > 0) {

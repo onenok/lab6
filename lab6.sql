@@ -29,7 +29,7 @@ SET time_zone = "+08:00";
 
 CREATE TABLE `cart` (
   `cart_id` bigint(20) NOT NULL COMMENT '購物車項目唯一編號',
-  `member_id` varchar(50) NOT NULL COMMENT '會員帳號',
+  `loginname` varchar(50) NOT NULL COMMENT '會員帳號',
   `product_id` int(11) NOT NULL COMMENT '商品編號（參考 products 表）',
   `snapshot_name` varchar(100) NOT NULL COMMENT '加入時的商品名稱',
   `snapshot_price` decimal(10,2) NOT NULL COMMENT '加入時的價格',
@@ -47,7 +47,7 @@ CREATE TABLE `cart` (
 --
 
 CREATE TABLE `member` (
-  `member_id` varchar(50) NOT NULL COMMENT '登入帳號，註冊後不可更改',
+  `loginname` varchar(50) NOT NULL COMMENT '登入帳號，註冊後不可更改',
   `pwd` varchar(255) NOT NULL COMMENT '密碼（建議使用雜湊）',
   `member_name` varchar(100) NOT NULL COMMENT '顯示名稱，可重複',
   `member_telno` varchar(20) DEFAULT NULL COMMENT '電話號碼，可為空',
@@ -60,7 +60,7 @@ CREATE TABLE `member` (
 -- 傾印資料表的資料 `member`
 --
 
-INSERT INTO `member` (`member_id`, `pwd`, `member_name`, `member_telno`, `member_addr`, `created_at`, `updated_at`) VALUES
+INSERT INTO `member` (`loginname`, `pwd`, `member_name`, `member_telno`, `member_addr`, `created_at`, `updated_at`) VALUES
 ('aeoja', '$2y$10$qwhCEAPj5wE30a7GpIXqMeH6hNs1xhB.dqJG9JFK2Xddiq4yxEMWG', 'aeoja', NULL, NULL, '2026-03-06 21:28:44', '2026-03-06 21:28:44'),
 ('jackyhk', 'jackyhk99', 'Jacky HK', NULL, NULL, '2026-03-06 15:47:54', '2026-03-06 15:47:54'),
 ('kenny123', 'kenny1234', 'Kenny Wong', '91234567', 'Room 101, Block A', '2026-03-06 15:47:54', '2026-03-06 15:47:54'),
@@ -137,14 +137,14 @@ INSERT INTO `products` (`product_id`, `product_name`, `type`, `supplier`, `descr
 --
 ALTER TABLE `cart`
   ADD PRIMARY KEY (`cart_id`),
-  ADD UNIQUE KEY `uk_member_product` (`member_id`,`product_id`),
+  ADD UNIQUE KEY `uk_member_product` (`loginname`,`product_id`),
   ADD KEY `product_id` (`product_id`);
 
 --
 -- 資料表索引 `member`
 --
 ALTER TABLE `member`
-  ADD PRIMARY KEY (`member_id`);
+  ADD PRIMARY KEY (`loginname`);
 
 --
 -- 資料表索引 `products`
@@ -176,7 +176,7 @@ ALTER TABLE `products`
 -- 資料表的限制式 `cart`
 --
 ALTER TABLE `cart`
-  ADD CONSTRAINT `cart_ibfk_1` FOREIGN KEY (`member_id`) REFERENCES `member` (`member_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `cart_ibfk_1` FOREIGN KEY (`loginname`) REFERENCES `member` (`loginname`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `cart_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `products` (`product_id`) ON UPDATE CASCADE;
 COMMIT;
 

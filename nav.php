@@ -14,7 +14,7 @@ $username = $isLoggedIn ? $_SESSION['login'] : "訪客";
         <?php else: ?>
             <!-- If guest, show Login and Signup -->
             <a href="login.php" class="btn-login">登入</a>
-            <a href="signup.php" class="btn-signup">註冊</a>
+            <a href="member_reg.php" class="btn-signup">註冊</a>
         <?php endif; ?>
     </div>
 </nav>

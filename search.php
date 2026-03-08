@@ -13,7 +13,7 @@ if (empty($_POST['csrf_token']) || !hash_equals($_SESSION['csrf_token'] ?? '', $
 }
 
 // 2. Search user in DB (Safe way)
-$sql = "SELECT * FROM member WHERE member_id = ?";
+$sql = "SELECT * FROM member WHERE loginname = ?";
 $response = safeQuery($sql, "s", [$name]);
 
 // 3. If SQL crash, show error and stop
@@ -25,7 +25,7 @@ if (!$response->success) {
 // 4. If found a row, verify password and save username to Session
 if ($response->result && $data = $response->result->fetch_assoc()) {
     if (password_verify($pwd, $data['pwd'])) {
-        $_SESSION["login"] = $data['member_id'];
+        $_SESSION["login"] = $data['loginname'];
     }
 }
 

@@ -31,7 +31,7 @@ $sql = 'SELECT c.product_id, c.qty,
        c.snapshot_description AS description,
        c.snapshot_type AS type
 FROM cart c
-WHERE c.member_id = ?';
+WHERE c.loginname = ?';
 $res = safeQuery($sql, 's', [$member]);
 if ($res->success && $res->result) {
     $cartItems = $res->result->fetch_all(MYSQLI_ASSOC);
@@ -65,7 +65,7 @@ if (!empty($cartItems)) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'save_cart') {
     // CSRF
     if (empty($_POST['csrf_token']) || !hash_equals($_SESSION['csrf_token'] ?? '', $_POST['csrf_token'])) {
-        header('Location: shopping_cart.php?msg=invalid_input');
+        header('Location: show_cart.php?msg=invalid_input');
         exit;
     }
     $updates = $_POST['qty'] ?? [];
@@ -79,7 +79,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'save_
                 break;
             }
             // delete from cart
-            $d = safeQuery('DELETE FROM cart WHERE member_id = ? AND product_id = ?', 'si', [$member, $pid]);
+            $d = safeQuery('DELETE FROM cart WHERE loginname = ? AND product_id = ?', 'si', [$member, $pid]);
             if (!$d->success) {
                 $status = 3; // db error
                 break;
@@ -92,7 +92,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'save_
                 break;
             }
             // update cart
-            $u = safeQuery('UPDATE cart SET qty = ? WHERE member_id = ? AND product_id = ?', 'isi', [$qty, $member, $pid]);
+            $u = safeQuery('UPDATE cart SET qty = ? WHERE loginname = ? AND product_id = ?', 'isi', [$qty, $member, $pid]);
             if (!$u->success) {
                 $status = 3; // db error
                 break;
@@ -106,7 +106,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'save_
         3 => 'update_failed',
         default => '未知錯誤',
     };
-    header('Location: shopping_cart.php?msg=' . $mmsg);
+    header('Location: show_cart.php?msg=' . $mmsg);
     exit;
 }
 
@@ -114,7 +114,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'save_
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'confirm_purchase') {
     // CSRF
     if (empty($_POST['csrf_token']) || !hash_equals($_SESSION['csrf_token'] ?? '', $_POST['csrf_token'])) {
-        header('Location: shopping_cart.php?msg=invalid_input');
+        header('Location: show_cart.php?msg=invalid_input');
         exit;
     }
     // re-fetch to ensure latest
@@ -126,7 +126,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'confi
 
     // if no items, just redirect back
     if (empty($cartItems)) {
-        header('Location: shopping_cart.php?msg=invalid_input');
+        header('Location: show_cart.php?msg=invalid_input');
         exit;
     }
 
@@ -159,7 +159,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'confi
         exit;
     } else {
         $conn->rollback();
-        header('Location: shopping_cart.php?msg=out_of_stock');
+        header('Location: show_cart.php?msg=out_of_stock');
         exit;
     }
 }
@@ -193,7 +193,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'confi
             cursor: pointer;
         }
 
-        /* product list (match list.php style) */
+        /* product list (match product_list.php style) */
         .product-list {
             max-width: 900px;
             margin: 0 auto;
@@ -339,7 +339,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'confi
         <div style="display:grid; grid-template-columns: auto fit-content(100%); align-items: center; gap: 10px;">
             <div>
                 <a href="index.php">返回主頁</a>
-                <a href="list.php">繼續購物</a>
+                <a href="product_list.php">繼續購物</a>
             </div>
             <button id="confirmPurchaseBtn"
                 class="btn primary"
@@ -359,7 +359,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'confi
             <?php endif; ?>
         </div>
 
-        <form id="editCartForm" method="post" action="shopping_cart.php">
+        <form id="editCartForm" method="post" action="show_cart.php">
             <input type="hidden" name="action" value="save_cart">
             <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token'] ?? ''); ?>">
             <div class="product-list">
@@ -463,7 +463,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'confi
         </form>
     </div>
     <!-- hidden form for confirm purchase -->
-    <form id="confirmForm" method="post" action="shopping_cart.php" style="display:none;">
+    <form id="confirmForm" method="post" action="show_cart.php" style="display:none;">
         <input type="hidden" name="action" value="confirm_purchase">
         <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token'] ?? ''); ?>">
     </form>
