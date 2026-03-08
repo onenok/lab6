@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- 主機： 127.0.0.1
--- 產生時間： 2026-03-08 13:24:28
+-- 產生時間： 2026-03-08 15:55:41
 -- 伺服器版本： 10.4.32-MariaDB
 -- PHP 版本： 8.2.12
 
@@ -29,7 +29,7 @@ SET time_zone = "+08:00";
 
 CREATE TABLE `cart` (
   `cart_id` bigint(20) NOT NULL COMMENT '購物車項目唯一編號',
-  `loginname` varchar(50) NOT NULL COMMENT '會員帳號',
+  `member_id` int(10) UNSIGNED NOT NULL COMMENT '會員帳號',
   `product_id` int(11) NOT NULL COMMENT '商品編號（參考 products 表）',
   `snapshot_name` varchar(100) NOT NULL COMMENT '加入時的商品名稱',
   `snapshot_price` decimal(10,2) NOT NULL COMMENT '加入時的價格',
@@ -47,6 +47,7 @@ CREATE TABLE `cart` (
 --
 
 CREATE TABLE `member` (
+  `Member_id` int(10) UNSIGNED NOT NULL,
   `loginname` varchar(50) NOT NULL COMMENT '登入帳號，註冊後不可更改',
   `pwd` varchar(255) NOT NULL COMMENT '密碼（建議使用雜湊）',
   `member_name` varchar(100) NOT NULL COMMENT '顯示名稱，可重複',
@@ -60,14 +61,14 @@ CREATE TABLE `member` (
 -- 傾印資料表的資料 `member`
 --
 
-INSERT INTO `member` (`loginname`, `pwd`, `member_name`, `member_telno`, `member_addr`, `created_at`, `updated_at`) VALUES
-('aeoja', '$2y$10$qwhCEAPj5wE30a7GpIXqMeH6hNs1xhB.dqJG9JFK2Xddiq4yxEMWG', 'aeoja', NULL, NULL, '2026-03-06 21:28:44', '2026-03-06 21:28:44'),
-('jackyhk', 'jackyhk99', 'Jacky HK', NULL, NULL, '2026-03-06 15:47:54', '2026-03-06 15:47:54'),
-('kenny123', 'kenny1234', 'Kenny Wong', '91234567', 'Room 101, Block A', '2026-03-06 15:47:54', '2026-03-06 15:47:54'),
-('lily_ho', 'lilyho2023', 'Lily Ho', '98765432', NULL, '2026-03-06 15:47:54', '2026-03-06 15:47:54'),
-('mary_cheung', 'maryc123', 'Mary Cheung', '91288899', '88 Example St', '2026-03-06 15:47:54', '2026-03-06 15:47:54'),
-('sophia_lam', 'sophia2026', 'Sophia Lam', '60123456', '168 Sample Rd', '2026-03-06 15:47:54', '2026-03-06 15:47:54'),
-('tommychan', 'tommy888', 'Tommy Chan', NULL, 'Flat 8, Tower B', '2026-03-06 15:47:54', '2026-03-06 15:47:54');
+INSERT INTO `member` (`Member_id`, `loginname`, `pwd`, `member_name`, `member_telno`, `member_addr`, `created_at`, `updated_at`) VALUES
+(1, 'aeoja', '$2y$10$qwhCEAPj5wE30a7GpIXqMeH6hNs1xhB.dqJG9JFK2Xddiq4yxEMWG', 'aeoja', NULL, NULL, '2026-03-06 21:28:44', '2026-03-06 21:28:44'),
+(2, 'jackyhk', 'jackyhk99', 'Jacky HK', NULL, NULL, '2026-03-06 15:47:54', '2026-03-06 15:47:54'),
+(3, 'kenny123', 'kenny1234', 'Kenny Wong', '91234567', 'Room 101, Block A', '2026-03-06 15:47:54', '2026-03-06 15:47:54'),
+(4, 'lily_ho', 'lilyho2023', 'Lily Ho', '98765432', NULL, '2026-03-06 15:47:54', '2026-03-06 15:47:54'),
+(5, 'mary_cheung', 'maryc123', 'Mary Cheung', '91288899', '88 Example St', '2026-03-06 15:47:54', '2026-03-06 15:47:54'),
+(6, 'sophia_lam', 'sophia2026', 'Sophia Lam', '60123456', '168 Sample Rd', '2026-03-06 15:47:54', '2026-03-06 15:47:54'),
+(7, 'tommychan', 'tommy888', 'Tommy Chan', NULL, 'Flat 8, Tower B', '2026-03-06 15:47:54', '2026-03-06 15:47:54');
 
 -- --------------------------------------------------------
 
@@ -95,8 +96,8 @@ INSERT INTO `products` (`product_id`, `product_name`, `type`, `supplier`, `descr
 (1, '可樂 Classic', 'drinks', '可口可樂公司', '經典碳酸飲料，冰涼爽口', 18.50, 0, '2026-03-08 14:14:07', '2026-03-06 15:57:28'),
 (3, '礦泉水 600ml', 'drinks', '康師傅', '天然弱鹼性水', 8.00, 0, '2026-03-07 22:38:29', '2026-03-06 15:57:28'),
 (5, '巧克力夾心餅乾', 'food', 'OREO', '酥脆可口夾心', 52.50, 0, '2026-03-08 20:06:36', '2026-03-06 15:57:28'),
-(6, '牛肉乾原味', 'food', '老四川', '香辣軟嫩牛肉乾', 68.00, 6, '2026-03-08 20:07:13', '2026-03-06 15:57:28'),
-(7, '泰國芒果乾', 'food', '泰國皇家', '天然果乾無添加', 55.00, 4, '2026-03-08 20:06:36', '2026-03-06 15:57:28'),
+(6, '牛肉乾原味', 'food', '老四川', '香辣軟嫩牛肉乾', 68.00, 3, '2026-03-08 22:54:12', '2026-03-06 15:57:28'),
+(7, '泰國芒果乾', 'food', '泰國皇家', '天然果乾無添加', 55.00, 3, '2026-03-08 22:54:01', '2026-03-06 15:57:28'),
 (8, '樂高經典積木 1000片', 'toy', 'LEGO', '基礎創意積木組', 399.00, 9, '2026-03-08 20:06:36', '2026-03-06 15:57:28'),
 (9, '毛絨泰迪熊 50cm', 'toy', '迪士尼授權', '超軟Q彈抱抱熊', 280.00, 9, '2026-03-08 20:06:36', '2026-03-06 15:57:28'),
 (10, '遙控賽車 1:16', 'toy', 'Double Eagle', '高速四驅越野車', 450.00, 9, '2026-03-08 20:06:36', '2026-03-06 15:57:28'),
@@ -137,14 +138,15 @@ INSERT INTO `products` (`product_id`, `product_name`, `type`, `supplier`, `descr
 --
 ALTER TABLE `cart`
   ADD PRIMARY KEY (`cart_id`),
-  ADD UNIQUE KEY `uk_member_product` (`loginname`,`product_id`),
+  ADD UNIQUE KEY `uk_member_product` (`member_id`,`product_id`),
   ADD KEY `product_id` (`product_id`);
 
 --
 -- 資料表索引 `member`
 --
 ALTER TABLE `member`
-  ADD PRIMARY KEY (`loginname`);
+  ADD PRIMARY KEY (`loginname`),
+  ADD UNIQUE KEY `mem_id` (`Member_id`);
 
 --
 -- 資料表索引 `products`
@@ -160,7 +162,13 @@ ALTER TABLE `products`
 -- 使用資料表自動遞增(AUTO_INCREMENT) `cart`
 --
 ALTER TABLE `cart`
-  MODIFY `cart_id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '購物車項目唯一編號', AUTO_INCREMENT=48;
+  MODIFY `cart_id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '購物車項目唯一編號', AUTO_INCREMENT=52;
+
+--
+-- 使用資料表自動遞增(AUTO_INCREMENT) `member`
+--
+ALTER TABLE `member`
+  MODIFY `Member_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- 使用資料表自動遞增(AUTO_INCREMENT) `products`
@@ -176,7 +184,7 @@ ALTER TABLE `products`
 -- 資料表的限制式 `cart`
 --
 ALTER TABLE `cart`
-  ADD CONSTRAINT `cart_ibfk_1` FOREIGN KEY (`loginname`) REFERENCES `member` (`loginname`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `cart_ibfk_1` FOREIGN KEY (`member_id`) REFERENCES `member` (`Member_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `cart_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `products` (`product_id`) ON UPDATE CASCADE;
 COMMIT;
 
